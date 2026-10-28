@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POC Doget — OAuth Callback</title>
+</head>
+<body>
+  <h2>POC Doget — OAuth Callback</h2>
+  <p id="status">Processing Google OAuth response...</p>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const APPS_SCRIPT_URL =
+        'https://script.google.com/macros/s/' +
+        'AKfycbyLwP6ieCuq7Eys19iXj2MfFYRp-V9nwZbCuiuAGPdUSl-kHgiywLOaVrAibK93FzfC2w' +
+        '/exec';
+
+      const status = document.getElementById('status');
+      const params = new URLSearchParams(window.location.search);
+
+      const code = params.get('code');
+      const state = params.get('state');
+      const error = params.get('error');
+
+      // Remove sensitive parameters from the visible URL.
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname
+      );
+
+      if (!state || (!code && !error)) {
+        status.textContent =
+          'Callback ready. No OAuth response received.';
+        return;
+      }
+
+      const forward = new URL(APPS_SCRIPT_URL);
+
+      if (code) {
+        forward.searchParams.set('code', code);
+      }
+
+      if (error) {
+        forward.searchParams.set('error', error);
+      }
+
+      forward.searchParams.set('state', state);
+
+      status.textContent = 'Forwarding to Apps Script...';
+
+      // No authuser parameter is forwarded.
+      window.location.replace(forward.toString());
+    })();
+  </script>
+</body>
+</html>
